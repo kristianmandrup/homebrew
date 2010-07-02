@@ -6,14 +6,32 @@ class Mongodb <Formula
 
   aka :mongo
 
-  if Hardware.is_64_bit? and not ARGV.include? '--32bit'
-    url 'http://downloads.mongodb.org/osx/mongodb-osx-x86_64-1.4.4.tgz'
-    md5 '8791c484c1580d563f1a071e5eed9fa5'
-    version '1.4.4-x86_64'
-  else
-    url 'http://downloads.mongodb.org/osx/mongodb-osx-i386-1.4.4.tgz'
-    md5 '8e31cc8b8f4879812cad217ce5b49b20'
+  if ARGV.include? '--version'
+    ARGV.each_with_index do |arg, i|
+      if arg == '--version'
+        arg_version = ARGV[i + 1] if ARGV[i + 1]
+        version_arr = arg_version.split('-')
+        if version_arr[0].include?('osx')
+          version_str = version_arr[1] + '-' + version_arr[0]
+        else
+          version_str = version_arr[0] + '-' + version_arr[1]          
+        end
+        version version_str        
+        url "http://downloads.mongodb.org/osx/mongodb-#{arg_version}.tgz"
+      end
+    end
+  elsif Hardware.is_64_bit? and not ARGV.include? '--32bit'
+      version '1.4.4-x86_64'
+      if !File.exist?('mongodb-osx-x86_64-1.4.4.tgz')
+        url 'http://downloads.mongodb.org/osx/mongodb-osx-x86_64-1.4.4.tgz'
+        md5 '8791c484c1580d563f1a071e5eed9fa5'      
+      end
+  else                                             
     version '1.4.4-i386'
+    if !File.exist?('mongodb-osx-i386-1.4.4.tgz')    
+      url 'http://downloads.mongodb.org/osx/mongodb-osx-i386-1.4.4.tgz'
+      md5 '8e31cc8b8f4879812cad217ce5b49b20'
+    end
   end
 
   def skip_clean? path
